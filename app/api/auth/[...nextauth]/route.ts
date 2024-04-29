@@ -24,11 +24,11 @@ const authOptions: NextAuthOptions = {
         const userFound = await db.query.users.findFirst({
           where: (user, { eq }) => eq(user.username, credentials.username),
         });
-        
+
         if (!userFound) {
           return null;
         }
-        console.log(userFound);
+
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
           userFound.password,
