@@ -1,9 +1,13 @@
-import { createClient } from "@libsql/client";
-import { drizzle, LibSQLDatabase } from "drizzle-orm/libsql";
-import { migrate } from "drizzle-orm/libsql/migrator";
+import {
+  drizzle,
+  type BetterSQLite3Database,
+} from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
 
 import * as schema from "../../../drizzel/schema";
 
-export const db = drizzle(createClient({ url: "file:drizzel/dev.db" }), {
+const sqlite = new Database("drizzel/dev.db");
+
+export const db: BetterSQLite3Database<typeof schema> = drizzle(sqlite, {
   schema,
 });

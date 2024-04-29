@@ -1,4 +1,4 @@
-import { migrate } from "drizzle-orm/neon-http/migrator";
+import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { db } from "@/app/libs/db/db";
 const main = async () => {
   try {

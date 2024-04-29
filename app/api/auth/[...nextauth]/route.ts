@@ -20,9 +20,21 @@ const authOptions: NextAuthOptions = {
           placeholder: "******",
         },
       },
-      async authorize(credentials, req) {
+      async authorize(
+        credentials,
+        req
+      ): Promise<{ id: number; username: string } | null> {
+        const { username, password } = credentials as {
+          username: string;
+          password: string;
+        };
+        console.log(credentials);
+        if (!username || !password) {
+          return null;
+        }
+
         const userFound = await db.query.users.findFirst({
-          where: (user, { eq }) => eq(user.username, credentials.username),
+          where: (user, { eq }) => eq(user.username, username),
         });
 
         if (!userFound) {
@@ -30,14 +42,14 @@ const authOptions: NextAuthOptions = {
         }
 
         const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          userFound.password,
+          password,
+          userFound.password
         );
 
         if (!isPasswordValid) {
           return null;
         }
-
+        console.log(userFound);
         return {
           id: userFound.id,
           username: userFound.username,
