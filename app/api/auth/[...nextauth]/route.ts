@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { Awaitable, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/app/libs/db/db";
 import bcrypt from "bcrypt";
@@ -20,17 +20,14 @@ const authOptions: NextAuthOptions = {
           placeholder: "******",
         },
       },
-      async authorize(
-        credentials,
-        req
-      ): Promise<{ id: number; username: string } | null> {
+      async authorize(credentials: Record<string, string> | undefined, req) {
         const { username, password } = credentials as {
           username: string;
           password: string;
         };
         console.log(credentials);
         if (!username || !password) {
-          return null;
+          throw new Error("Missing username or password");
         }
 
         const userFound = await db.query.users.findFirst({
@@ -38,7 +35,7 @@ const authOptions: NextAuthOptions = {
         });
 
         if (!userFound) {
-          return null;
+          throw new Error("User not found");
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -47,9 +44,8 @@ const authOptions: NextAuthOptions = {
         );
 
         if (!isPasswordValid) {
-          return null;
+          throw new Error("Invalid password");
         }
-        console.log(userFound);
         return {
           id: userFound.id,
           username: userFound.username,
@@ -57,6 +53,9 @@ const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  pages: {
+    signIn: "/auth/login",
+  },
 };
 
 const auth = NextAuth(authOptions);

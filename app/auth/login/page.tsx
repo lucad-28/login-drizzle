@@ -1,25 +1,49 @@
 "use client";
 import { useForm, SubmitHandler } from "react-hook-form";
 import type { UserTp } from "@/app/types/user";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default function Login() {
+export default function Login(): JSX.Element {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<UserTp>();
-  const onSubmit: SubmitHandler<any> = (data) => {
+
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const onSubmit: SubmitHandler<UserTp> = async (data) => {
     console.log(data);
+    const res = await signIn("credentials", {
+      username: data.username,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (res?.error) {
+      setError(res.error);
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   return (
-    <section className="dark bg-gray-50 dark:bg-gray-900">
+    <section className="dark bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
         <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
               Iniciar Sesión
             </h1>
+
+            {error && (
+              <div className="p-2 text-red-500 bg-red-100 rounded-md">
+                {error}
+              </div>
+            )}
             <form
               className="space-y-4 md:space-y-6"
               onSubmit={handleSubmit(onSubmit)}
@@ -82,7 +106,7 @@ export default function Login() {
                 type="submit"
                 className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
               >
-                Create an account
+                Iniciar Sesión
               </button>
             </form>
           </div>
